@@ -1,6 +1,8 @@
 import random
 import json
 
+nombre = input("Bienvenido a Adivina quién de Harry Potter! Cómo te llamas?")
+
 def game():
     with open('./data.json') as f:
         diccionario_personajes = json.load(f)
@@ -20,15 +22,21 @@ def game():
         ans = False
         while ans == False:
             guess = input()
-            if guess.lower() in [personajes.lower() for personajes in personajes]:
+            if guess.lower() in [menos_errados.lower() for menos_errados in menos_errados]:
                 if guess.lower() == secreto.lower():
+                    print("Felcidades! Ganaste el juego :)")
                     while True:
-                        juego = input("Felicidades! Ganaste! :) Quieres jugar de nuevo? Y/N")
-                        if juego.lower() == 'y':
-                            game()
-                        if juego.lower() == 'n':
-                            print("Gracias por jugar")
-                            exit()
+                        juego = input("Quieres jugar de nuevo y/n?")
+                        try:
+                            if juego.lower() == 'y':
+                                game()
+                            elif juego.lower() == 'n':
+                                print("Gracias por jugar")
+                                exit()
+                            else:
+                                raise ValueError
+                        except ValueError:
+                            print("Por favor ingresa y/n")
                 else:
                     print('\nPersonaje incorrecto')
                     [pers_err.append(guess.capitalize())]
@@ -38,11 +46,11 @@ def game():
                 print("Por favor selecciona un personaje correcto")
 
     def adivinar_casa(personajes, casa):
-        print('\nOpciones:', all_casas)
+        print('\nOpciones:', casas_erradas)
         ans = False
         while ans == False:
             guess = input()
-            if guess.lower() in [all_casas.lower() for all_casas in all_casas]:
+            if guess.lower() in [casas_erradas.lower() for casas_erradas in casas_erradas]:
                 if guess.lower() == casa.lower():
                     print('\nCasa correcta')
                     personajes = [pers for pers in personajes if diccionario_personajes[pers]['casa'] == casa]
@@ -51,17 +59,18 @@ def game():
                     ans = True
                 else:
                     print('\nCasa erronea')
+                    [cas_err.append(guess.lower())]
                     return posibles
                     ans = True
             else:
                 print("Por favor selecciona una casa correcta")
 
     def adivinar_patronus(personajes, patronus):
-        print('\nOpciones:', all_patronus)
+        print('\nOpciones:', patronus_errados)
         ans = False
         while ans == False:
             guess = input()
-            if guess.lower() in [all_patronus.lower() for all_patronus in all_patronus]:
+            if guess.lower() in [patronus_errados.lower() for patronus_errados in patronus_errados]:
                 if guess.lower() == patronus.lower():
                     print('\nPatronus correcto')
                     personajes = ([pers for pers in personajes if diccionario_personajes[pers]['patronus'] == patronus])
@@ -69,7 +78,8 @@ def game():
                     return personajes
                     ans = True
                 else:
-                    print('\nPatronus erróneo')
+                    print('\nPatronus incorrecto')
+                    [patr_err.append(guess.lower())]
                     return posibles
                     ans = True
             else:
@@ -77,11 +87,11 @@ def game():
 
 
     def adivinar_genero(personajes, genero):
-        print('\nOpciones:', all_generos)
+        print('\nOpciones:', generos_errados)
         ans = False
         while ans == False:
             guess = input()
-            if guess.lower() in [all_generos.lower() for all_generos in all_generos]:
+            if guess.lower() in [generos_errados.lower() for generos_errados in generos_errados]:
                 if guess.lower() == genero.lower():
                     print('\nGénero correcto')
                     personajes = [pers for pers in personajes if diccionario_personajes[pers]['genero'] == genero]
@@ -90,6 +100,7 @@ def game():
                     ans = True
                 else:
                     print('\nGénero incorrecto')
+                    [gen_err.append(guess.lower())]
                     return posibles
                     ans = True
             else:
@@ -109,11 +120,17 @@ def game():
     preguntas = 4
     correctas = []
     pers_err = []
+    cas_err = []
+    patr_err = []
+    gen_err = []
 
     while True:
-       rondas = input("Cuántas rondas quieres jugar?")
+       rondas = input(f"{nombre.capitalize()}, cuántas rondas quieres jugar?")
        try:
            rondas = int(rondas)
+           if rondas > 20:
+               print("Son demasiadas rondas... jueguemos solo 20")
+               rondas = 20
        except ValueError:
            print ("Por favor ingresa un número correcto")
        else:
@@ -128,6 +145,9 @@ def game():
         opciones = [i for i in [i + 1 for i in range(preguntas)] if i not in correctas]
         lista_posibles = [x for x in posibles if x not in blacklist]
         menos_errados = [i for i in lista_posibles if i not in pers_err]
+        casas_erradas = [i for i in all_casas if i not in cas_err]
+        patronus_errados = [i for i in all_patronus if i not in patr_err]
+        generos_errados = [i for i in all_generos if i not in gen_err]
 
         print("\nPersonajes posibles: ", menos_errados)
         try:
@@ -166,12 +186,20 @@ def game():
             print('Oops! Esa no fue una opción correcta. Intentémoslo de nuevo...')
 
     # Pierde el juego
+    print(f"Lo siento, perdiste. El personaje secreto era {secreto}")
+
     while True:
-        juego = input(f"Lo siento, perdiste. El personaje secreto era {secreto} :( Quieres jugar de nuevo? Y/N")
-        if juego.lower() == 'y':
-            game()
-        if juego.lower() == 'n':
-            print("Gracias por jugar")
-            exit()
+        juego = input("Quieres jugar de nuevo y/n?")
+        try:
+            if juego.lower() == 'y':
+                game()
+            elif juego.lower() == 'n':
+                print("Gracias por jugar")
+                exit()
+            else:
+                raise ValueError
+        except ValueError:
+            print("Por favor ingresa y/n")
+
 
 game()
